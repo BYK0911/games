@@ -12,10 +12,25 @@
     canvas {
       vertical-align: middle;
     }
+    .wrap {
+      display: inline-block;
+    }
+    .controls {
+      display:flex;
+      justify-content: space-between;
+    }
   </style>
 </head>
 <body>
-  <div id="teris"></div>
+  <div class="wrap">
+    <div id="teris" onclick="start()"></div>
+    <div class="controls">
+      <button onclick="move(-1, 0)"> ⮜ </button>
+      <button onclick="moveDown()"> ⮟ </button>
+      <button onclick="trans()"> TRANS </button>
+      <button onclick="move(1, 0)"> ⮞ </button>
+    </div>
+  </div>
 
   <script>
     const Teris = {
@@ -284,6 +299,28 @@
     }
 
     Teris.init(document.getElementById('teris'))
+  </script>
+
+  <script>
+    function start() {
+      if (Teris.status !== 1) {
+        Teris.start()
+      }
+    }
+    function move(dx, dy) {
+      if (Teris.status === 1 && Teris.canMove(dx, dy))
+        Teris.move(dx, dy)
+    }
+    function moveDown() {
+      if (Teris.status !== 1) return
+      while(Teris.canMove(0, 1)) {
+        Teris.move(0, 1)
+      }
+    }
+    function trans() {
+      if (Teris.status !== 1) return
+      Teris.transform()
+    }
   </script>
 </body>
 </html>
