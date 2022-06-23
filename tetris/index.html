@@ -7,13 +7,14 @@
   <title>Document</title>
   <style>
     body {
-      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    #teris {
+      height: calc(100vh - 130px);
     }
     canvas {
       vertical-align: middle;
-    }
-    .wrap {
-      display: inline-block;
     }
     .controls {
       position: fixed;
@@ -82,12 +83,14 @@
       scores: 0,
       status: 0,
       flag: false,
+      width: 0,
+      height: 0,
 
       init (dom) {
         const cvs = document.createElement('canvas')
         const ctx = cvs.getContext('2d')
-        const w = this.cols * this.gridSize + 20
-        const h = this.rows * this.gridSize + 50
+        const w = dom.offsetWidth
+        const h = dom.offsetHeight
         cvs.width = w
         cvs.height = h
         cvs.style.width = w + 'px'
@@ -97,6 +100,8 @@
         dom.appendChild(cvs)
         this.ctx = ctx
         this.initEvent()
+        this.width = w
+        this.height = h
       },
 
       initEvent () {
@@ -177,12 +182,19 @@
       render () {
         const ctx = this.ctx
         const gridSize = this.gridSize
+        const w = this.cols * gridSize + 20
+        const h = this.rows * gridSize + 50
+        const scale = Math.min(this.width / w, this.height / h)
+        const offsetX = (this.width - w * scale) / 2
+        const offsetY = (this.height - h * scale) / 2
 
-        ctx.clearRect(0, 0, 500, 500)
+        ctx.clearRect(0, 0, this.width, this.height)
         ctx.strokeStyle = '#ddd'
         ctx.fillStyle = '#000'
         ctx.font = '14px Arial'
-
+        ctx.save()
+        ctx.translate(offsetX, offsetY)
+        ctx.scale(scale, scale)
         const score = '得分：' + this.scores
         ctx.fillText(score, 10, 30)
 
@@ -203,9 +215,7 @@
           }
         }
 
-        ctx.save()
         ctx.translate(10, 40)
-
         for (let r = 0; r < this.rows; r++) {
           for (let c = 0; c < this.cols; c++) {
             ctx.fillStyle = this.panel[r][c] ? '#000' : '#f0f0f0'
