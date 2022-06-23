@@ -6,25 +6,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tetris</title>
   <style>
-    body {
+    html,body {
       margin: 0;
       padding: 0;
+      height: 100%;
+    }
+    .wrap {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     #teris {
-      height: calc(100vh - 130px);
+      flex: auto
     }
     canvas {
       vertical-align: middle;
     }
     .controls {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 0;
+      right: 0;
+      padding: 10px;
       text-align: center;
       user-select: none;
     }
     .row {
-      margin: 4px 0;
+      margin-top: 4px;
     }
     .btn {
       display: inline-block;
@@ -35,6 +42,17 @@
       line-height: 32px;
       background-color: #def;
       color: #5af;
+      border-radius: 3px;
+    }
+    .btn-start {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      padding: 4px 10px;
+      font-size: 12px;
+      background-color: #dfe;
+      color: #5b8;
+      border-radius: 3px;
     }
   </style>
 </head>
@@ -46,11 +64,23 @@
         <span class="btn" onclick="trans()"> TRANS </span>
       </div>
       <div class="row">
-        <span class="btn" onclick="move(-1, 0)"> LEFT </span>
-        <span class="btn" id="pauseBtn" onclick="pause()"> PAUSE </span>
-        <span class="btn" onclick="move(1, 0)"> RIGHT </span>
+        <span
+        class="btn"
+          onmousedown="move(-1, 0)"
+          onmouseup="cancelMove()"
+          ontouchstart="move(-1, 0)"
+          ontouchend="cancelMove()"
+          > LEFT </span>
+        <span class="btn" onclick="moveDown()" > DOWN </span>
+        <span
+          class="btn"
+          onmousedown="move(1, 0)"
+          onmouseup="cancelMove()"
+          ontouchstart="move(1, 0)"
+          ontouchend="cancelMove()"
+        > RIGHT </span>
       </div>
-      <div>
+      <div class="row">
         <span
           class="btn"
           onmousedown="speedUp()"
@@ -59,6 +89,8 @@
           ontouchend="cancelSpeedUp()"
         > SPEEDUP </span>
       </div>
+      
+      <span id="startBtn" class="btn-start" onclick="start()" > Start </span>
     </div>
   </div>
 
@@ -151,7 +183,7 @@
         const autoMoveDown = () => {
           if (this.status === 1) {
             this.autoMove()
-            this.timer = setTimeout(autoMoveDown, this.speedUp ? 150 : 500)
+            this.timer = setTimeout(autoMoveDown, this.speedUp ? 100 : 500)
           }
         }
 
@@ -360,14 +392,23 @@
   </script>
 
   <script>
+    let moveTimer = null
     function start() {
       if (Teris.status !== 1) {
         Teris.start()
       }
     }
     function move(dx, dy) {
-      if (Teris.status === 1 && Teris.canMove(dx, dy))
+      if (Teris.status === 1 && Teris.canMove(dx, dy)) {
         Teris.move(dx, dy)
+        moveTimer = setTimeout(()  => move(dx, dy), 100)
+      }
+    }
+    function cancelMove(dx, dy) {
+      if (moveTimer) {
+        clearTimeout(moveTimer)
+        moveTimer = null
+      }
     }
     function moveDown() {
       if (Teris.status !== 1) return
@@ -387,8 +428,8 @@
       window.event.preventDefault()
       Teris.speedUp = false
     }
-    function pause() {
-      const btn = document.getElementById('pauseBtn')
+    function start() {
+      const btn = document.getElementById('startBtn')
       Teris.status === 1 ? Teris.pause() : Teris.start()
       btn.innerHTML = Teris.status === 1 ? 'PAUSE' : "START"
     }
