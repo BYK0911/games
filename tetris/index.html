@@ -23,6 +23,9 @@
       vertical-align: middle;
     }
     .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 10px;
       text-align: center;
       user-select: none;
@@ -42,9 +45,6 @@
       border-radius: 3px;
     }
     .btn-start {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
       padding: 4px 10px;
       font-size: 12px;
       background-color: #dfe;
@@ -57,37 +57,23 @@
   <div class="wrap">
     <div id="teris" onclick="start()"></div>
     <div class="controls">
-      <div>
-        <span class="btn" onclick="trans()"> TRANS </span>
+      <div class="left">
+        <span id="startBtn" class="btn-start" onclick="start()" > Start </span>
       </div>
-      <div class="row">
-        <span
-        class="btn"
-          onmousedown="move(-1, 0)"
-          onmouseup="cancelMove()"
-          ontouchstart="move(-1, 0)"
-          ontouchend="cancelMove()"
-          > LEFT </span>
-        <span class="btn" onclick="moveDown()" > DOWN </span>
-        <span
-          class="btn"
-          onmousedown="move(1, 0)"
-          onmouseup="cancelMove()"
-          ontouchstart="move(1, 0)"
-          ontouchend="cancelMove()"
-        > RIGHT </span>
-      </div>
-      <div class="row">
-        <span
-          class="btn"
-          onmousedown="speedUp()"
-          onmouseup="cancelSpeedUp()"
-          ontouchstart="speedUp()"
-          ontouchend="cancelSpeedUp()"
-        > SPEEDUP </span>
+      <div class="right">
+        <div>
+          <span class="btn" onclick="trans()"> TRANS </span>
+        </div>
+        <div class="row">
+          <span class="btn" id="left"> LEFT </span>
+          <span class="btn" onclick="moveDown()" > DOWN </span>
+          <span class="btn" id="right"> RIGHT </span>
+        </div>
+        <div class="row">
+          <span class="btn" id="speedUp"> SPEEDUP </span>
+        </div>
       </div>
     </div>
-    <span id="startBtn" class="btn-start" onclick="start()" > Start </span>
   </div>
 
   <script>
@@ -388,6 +374,19 @@
   </script>
 
   <script>
+    const $ = id => document.getElementById(id)
+
+    
+    function moveLeft (e) {
+      e.preventDefault()
+      move(-1, 0)
+    }
+    
+    function moveRight (e) {
+      e.preventDefault()
+      move(1, 0)
+    }
+
     let moveTimer = null
     function start() {
       if (Teris.status !== 1) {
@@ -416,12 +415,12 @@
       if (Teris.status !== 1) return
       Teris.transform()
     }
-    function speedUp() {
-      window.event.preventDefault()
+    function speedUp(e) {
+      e.preventDefault()
       Teris.speedUp = true
     }
-    function cancelSpeedUp() {
-      window.event.preventDefault()
+    function cancelSpeedUp(e) {
+      e.preventDefault()
       Teris.speedUp = false
     }
     function start() {
@@ -429,6 +428,26 @@
       Teris.status === 1 ? Teris.pause() : Teris.start()
       btn.innerHTML = Teris.status === 1 ? 'PAUSE' : "START"
     }
+
+    const leftBtn = $('left')
+    leftBtn.onmousedown = moveLeft
+    leftBtn.onmouseup = cancelMove
+    leftBtn.ontouchstart = moveLeft
+    leftBtn.ontouchend = cancelMove
+
+    const rightBtn = $('right')
+    rightBtn.onmousedown = moveRight
+    rightBtn.onmouseup = cancelMove
+    rightBtn.ontouchstart = moveRight
+    rightBtn.ontouchend = cancelMove
+
+    const speed = $('speedUp')
+    speed.onmousedown = speedUp
+    speed.onmouseup = cancelSpeedUp
+    speed.ontouchstart = speedUp
+    speed.ontouchend = cancelSpeedUp
+
+
   </script>
 </body>
 </html>
