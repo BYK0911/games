@@ -16,11 +16,24 @@
       display: inline-block;
     }
     .controls {
-      display:flex;
-      justify-content: space-between;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      text-align: right;
+      user-select: none;
     }
-    button {
-      padding: 6px 10px;
+    .row {
+      margin: 4px 0;
+    }
+    span {
+      display: inline-block;
+      width: 60px;
+      height: 32px;
+      font-size: 12px;
+      text-align: center;
+      line-height: 32px;
+      background-color: #def;
+      color: #5af;
     }
   </style>
 </head>
@@ -28,10 +41,18 @@
   <div class="wrap">
     <div id="teris" onclick="start()"></div>
     <div class="controls">
-      <button onclick="move(-1, 0)"> LEFT </button>
-      <button onclick="moveDown()"> DOWN </button>
-      <button onclick="trans()"> TRANS </button>
-      <button onclick="move(1, 0)"> RIGHT </button>
+      <div>
+        <span class="btn" id="pauseBtn" onclick="pause()"> PAUSE </span>
+        <span class="btn" onclick="trans()"> TRANS </span>
+      </div>
+      <div class="row">
+        <span class="btn" onclick="move(-1, 0)"> LEFT </span>
+        <span class="btn" onclick="move(1, 0)"> RIGHT </span>
+      </div>
+      <div>
+        <span class="btn" onclick="moveDown()"> DOWN </span>
+        <span class="btn" onmousedown="speedUp()" onmouseup="cancelSpeedUp()"> SPEEDUP </span>
+      </div>
     </div>
   </div>
 
@@ -53,11 +74,14 @@
       nextElem: null,
       animationId: null,
       timer: null,
+      interval: 500,
+      speedUp: false,
       rows: 20,
       cols: 12,
       gridSize: 20,
       scores: 0,
       status: 0,
+      flag: false,
 
       init (dom) {
         const cvs = document.createElement('canvas')
@@ -72,9 +96,6 @@
         dom.innerHTML = ''
         dom.appendChild(cvs)
         this.ctx = ctx
-
-        this.initPanel();
-        this.render()
         this.initEvent()
       },
 
@@ -89,22 +110,28 @@
               this.move(dx, 0)
             }
           } else if (keyCode === 40) {
-            while(this.canMove(0, 1)) {
-              this.move(0, 1)
-            }
+            this.speedUp = true
           } else if (keyCode === 38) {
             this.transform()
+          }
+        })
+        window.addEventListener('keyup', e => {
+          if (e.keyCode === 40) {
+            this.speedUp = false
           }
         })
       },
 
       start () {
-        this.status = 1;
-        this.scores = 0;
-        this.genNext();
-        this.currElem = this.nextElem;
-        this.genNext();
+        if (this.status === 3 || this.status === 0) {
+          this.scores = 0;
+          this.initPanel()
+          this.genNext();
+          this.currElem = this.nextElem;
+          this.genNext();
+        }
 
+        this.status = 1;
         const render = () => {
           if (this.status === 1) {
             this.render()
@@ -112,9 +139,10 @@
           }
         }
         const autoMoveDown = () => {
+          console.log(this.status)
           if (this.status === 1) {
             this.autoMove()
-            this.timer = setTimeout(autoMoveDown, 500)
+            this.timer = setTimeout(autoMoveDown, this.speedUp ? 150 : 500)
           }
         }
 
@@ -128,8 +156,16 @@
         }
       },
 
-      gameover () {
+      pause () {
         this.status = 2
+        window.cancelAnimationFrame(this.animationId)
+        clearTimeout(this.timer)
+        this.animationId = null
+        this.timer = null
+      },
+
+      gameover () {
+        this.status = 3
         window.cancelAnimationFrame(this.animationId)
         clearTimeout(this.timer)
         this.animationId = null
@@ -230,12 +266,17 @@
           }
           _data.push(row)
         }
+        const int = n => this.flag ? Math.floor(n) : Math.ceil(n)
+        this.flag = !this.flag
         this.currElem.width = height
         this.currElem.height = width
-        this.currElem.y = y + height - 1
+        this.currElem.x = Math.min(this.cols - 1, Math.max(0, int(x + width / 2 - height / 2)))
+        this.currElem.y = y + height - width
         this.currElem.data =  _data
 
         if (!this.canMove(0, 0)) {
+          this.currElem.x = x
+          this.currElem.y = y
           this.currElem.width = width
           this.currElem.height = height
           this.currElem.data =  data
@@ -323,6 +364,17 @@
     function trans() {
       if (Teris.status !== 1) return
       Teris.transform()
+    }
+    function speedUp() {
+      Teris.speedUp = true
+    }
+    function cancelSpeedUp() {
+      Teris.speedUp = false
+    }
+    function pause() {
+      const btn = document.getElementById('pauseBtn')
+      btn.innerHTML = Teris.status === 1 ? 'PAUSE' : "START"
+      Teris.status === 1 ? Teris.pause() : Teris.start()
     }
   </script>
 </body>
