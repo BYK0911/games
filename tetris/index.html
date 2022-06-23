@@ -23,9 +23,6 @@
       vertical-align: middle;
     }
     .controls {
-      position: fixed;
-      bottom: 0;
-      right: 0;
       padding: 10px;
       text-align: center;
       user-select: none;
@@ -89,9 +86,8 @@
           ontouchend="cancelSpeedUp()"
         > SPEEDUP </span>
       </div>
-      
-      <span id="startBtn" class="btn-start" onclick="start()" > Start </span>
     </div>
+    <span id="startBtn" class="btn-start" onclick="start()" > Start </span>
   </div>
 
   <script>
@@ -401,7 +397,7 @@
     function move(dx, dy) {
       if (Teris.status === 1 && Teris.canMove(dx, dy)) {
         Teris.move(dx, dy)
-        moveTimer = setTimeout(()  => move(dx, dy), 100)
+        moveTimer = setTimeout(()  => move(dx, dy), 200)
       }
     }
     function cancelMove(dx, dy) {
