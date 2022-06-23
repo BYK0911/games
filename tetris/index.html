@@ -20,13 +20,13 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      text-align: right;
+      text-align: center;
       user-select: none;
     }
     .row {
       margin: 4px 0;
     }
-    span {
+    .btn {
       display: inline-block;
       width: 60px;
       height: 32px;
@@ -43,16 +43,21 @@
     <div id="teris" onclick="start()"></div>
     <div class="controls">
       <div>
-        <span class="btn" id="pauseBtn" onclick="pause()"> PAUSE </span>
         <span class="btn" onclick="trans()"> TRANS </span>
       </div>
       <div class="row">
         <span class="btn" onclick="move(-1, 0)"> LEFT </span>
+        <span class="btn" id="pauseBtn" onclick="pause()"> PAUSE </span>
         <span class="btn" onclick="move(1, 0)"> RIGHT </span>
       </div>
       <div>
-        <span class="btn" onclick="moveDown()"> DOWN </span>
-        <span class="btn" onmousedown="speedUp()" onmouseup="cancelSpeedUp()"> SPEEDUP </span>
+        <span
+          class="btn"
+          onmousedown="speedUp()"
+          onmouseup="cancelSpeedUp()"
+          ontouchstart="speedUp()"
+          ontouchend="cancelSpeedUp()"
+        > SPEEDUP </span>
       </div>
     </div>
   </div>
@@ -144,7 +149,6 @@
           }
         }
         const autoMoveDown = () => {
-          console.log(this.status)
           if (this.status === 1) {
             this.autoMove()
             this.timer = setTimeout(autoMoveDown, this.speedUp ? 150 : 500)
@@ -376,9 +380,11 @@
       Teris.transform()
     }
     function speedUp() {
+      window.event.preventDefault()
       Teris.speedUp = true
     }
     function cancelSpeedUp() {
+      window.event.preventDefault()
       Teris.speedUp = false
     }
     function pause() {
