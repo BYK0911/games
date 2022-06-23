@@ -166,7 +166,7 @@
         const autoMoveDown = () => {
           if (this.status === 1) {
             this.autoMove()
-            this.timer = setTimeout(autoMoveDown, this.speedUp ? 100 : 500)
+            this.timer = setTimeout(autoMoveDown, this.speedUp ? 100 : this.interval)
           }
         }
 
@@ -361,6 +361,22 @@
         if (rows.length) {
           this.clearRow(rows)
           this.scores += rows.length;
+          
+          if (this.scores > 20) {
+            this.interval = 450
+          } else if (this.scores > 40) {
+            this.interval = 400
+          } else if (this.scores > 60) {
+            this.interval = 350
+          } else if (this.scores > 90) {
+            this.interval = 300
+          } else if (this.scores > 140) {
+            this.interval = 250
+          } else if (this.scores > 200) {
+            this.interval = 200
+          } else if (this.scores > 300) {
+            this.interval = 150
+          }
         }
       },
 
