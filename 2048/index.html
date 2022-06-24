@@ -215,7 +215,6 @@
             }
           }
           sums.push(a)
-          console.log(sums)
           for (let r = 0; r < 4; r++) {
             this.data[r][c] = sums[3 - r] || 0
           }
@@ -266,16 +265,16 @@
       move (dir) {
         if (dir === 1) {
           if(!this.canUp()) return
-            this.up()
+          this.up()
         } else if (dir === 2) {
           if(!this.canRight()) return
-            this.right()
+          this.right()
         } else if (dir === 3) {
           if(!this.canDown()) return
-            this.down()
+          this.down()
         } else if (dir === 4) {
           if(!this.canLeft()) return
-            this.left()
+          this.left()
         }
         
         this.random()
@@ -295,8 +294,13 @@
           let a = 0
           for (let c = 3; c >= 0; c--) {
             let n = this.data[r][c]
-            if (a === 0) a = n
-            else if (n === 0 || a === n) return true
+            if (a === 0) {
+              a = n
+            } else if (n === 0 || a === n) {
+              return true
+            } else {
+              a = n
+            }
           }
         }
       },
@@ -306,8 +310,13 @@
           let a = 0
           for (let c = 0; c < 4; c++) {
             let n = this.data[r][c]
-            if (a === 0) a = n
-            else if (n === 0 || a === n) return true
+            if (a === 0) {
+              a = n
+            } else if (n === 0 || a === n) {
+              return true
+            } else {
+              a = n
+            }
           }
         }
       },
@@ -317,8 +326,13 @@
           let a = 0
           for (let r = 3; r >= 0; r--) {
             let n = this.data[r][c]
-            if (a === 0) a = n
-            else if (n === 0 || a === n) return true
+            if (a === 0) {
+              a = n
+            } else if (n === 0 || a === n) {
+              return true
+            } else {
+              a = n
+            }
           }
         }
       },
@@ -328,14 +342,19 @@
           let a = 0
           for (let r = 0; r < 4; r++) {
             let n = this.data[r][c]
-            if (a === 0) a = n
-            else if (n === 0 || a === n) return true
+            if (a === 0) {
+              a = n
+            } else if (n === 0 || a === n) {
+              return true
+            } else {
+              a = n
+            }
           }
         }
       },
 
       gameover () {
-        alert('Game over')
+        setTimeout(() => alert('Game over'))
       }
     }
   </script>
