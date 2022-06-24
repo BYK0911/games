@@ -7,7 +7,9 @@
   <title>2048</title>
   <style>
     .wrap {
-      margin: 20px auto;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, 0)
     }
     .panel {
       display: flex;
@@ -76,16 +78,16 @@
       content: '512';
       background-color: #f57;
     }
-    .grid-1048::after {
-      content: '1048';
+    .grid-1024::after {
+      content: '1024';
       background-color: #f4f;
     }
-    .grid-2096::after {
-      content: '2096';
+    .grid-2048::after {
+      content: '2048';
       background-color: #b5f;
     }
-    .grid-4192::after {
-      content: '4192';
+    .grid-4096::after {
+      content: '4096';
       background-color: #65f;
     }
     .controls {
@@ -113,15 +115,15 @@
   <div class="wrap"></div>
   <div class="controls">
     <div class="row">
-      <div class="btn" onclick="calc(38)">UP</div>
+      <div class="btn" onclick="move(38)">UP</div>
     </div>
     <div class="row">
-      <div class="btn" onclick="calc(37)">LEFT</div>
-      <div class="btn" onclick="calc(32)">Restart</div>
-      <div class="btn" onclick="calc(39)">RIGHT</div>
+      <div class="btn" onclick="move(37)">LEFT</div>
+      <div class="btn" onclick="move(32)">Restart</div>
+      <div class="btn" onclick="move(39)">RIGHT</div>
     </div>
     <div class="row">
-      <div class="btn" onclick="calc(40)">DOWN</div>
+      <div class="btn" onclick="move(40)">DOWN</div>
     </div>
   </div>
   <script>
@@ -167,10 +169,6 @@
           const n = Math.random() > .5 ? 4 : 2
           this.data[r][c] = n
         }
-
-        if (list.length === 1 && this.die()) {
-          this.gameover()
-        }
       },
       render () {
         for (let i = 0; i < 4; i++) {
@@ -179,46 +177,162 @@
           }
         }
       },
-      calc (dir) {
-        for (let i = 0; i < 4; i++) {
-          let a, sums = []
-          for (let j = 0; j < 4; j++) {
-            const c = dir === 1 ? i : dir === 2 ? 4 - j : dir === 3 ? i : j;
-            const r = dir === 1 ? j : dir === 2 ? i : dir === 3 ? 4 - j : i;
+      up () {
+        for (let c = 0; c < 4; c++) {
+          let a = 0; sums = []
+          for (let r = 0; r < 4; r++) {
             const n = this.data[r][c]
             if (n === 0) continue
-            if (!a) {
+            if (a === 0) a = n
+            else if (n === a) {
+              sums.push(n * 2)
+              a = 0
+            }else {
+              sums.push(a)
               a = n
-            } else if (n === a) {
-              sums.push(a * 2)
+            }
+          }
+          sums.push(a)
+          for (let r = 0; r < 4; r++) {
+            this.data[r][c] = sums[r] || 0
+          }
+        }
+      },
+      down () {
+        for (let c = 0; c < 4; c++) {
+          let a = 0; sums = []
+          for (let r = 3; r >= 0; r--) {
+            const n = this.data[r][c]
+            if (n === 0) continue
+            if (a === 0) a = n
+            else if (n === a) {
+              sums.push(n * 2)
+              a = 0
             } else {
               sums.push(a)
               a = n
             }
           }
           sums.push(a)
-          for (let j = 0; j < 4; j++) {
-            const c = dir === 1 ? i : dir === 2 ? 4 - j : dir === 3 ? i : j;
-            const r = dir === 1 ? j : dir === 2 ? i : dir === 3 ? 4 - j : i;
-            this.data[r][c] = sums[j] || 0
+          for (let r = 0; r < 4; r++) {
+            this.data[r][c] = sums[3 - r] || 0
           }
+        }
+      },
+      left () {
+        for (let r = 0; r < 4; r++) {
+          let a = 0; sums = []
+          for (let c = 0; c < 4; c++) {
+            const n = this.data[r][c]
+            if (n === 0) continue
+            if (a === 0) a = n
+            else if (n === a) {
+              sums.push(n * 2)
+              a = 0
+            } else {
+              sums.push(a)
+              a = n
+            }
+          }
+          sums.push(a)
+          for (let c = 0; c < 4; c++) {
+            this.data[r][c] = sums[c] || 0
+          }
+        }
+      },
+      right () {
+        for (let r = 0; r < 4; r++) {
+          let a = 0; sums = []
+          for (let c = 3; c >= 0; c--) {
+            const n = this.data[r][c]
+            if (n === 0) continue
+            if (a === 0) a = n
+            else if (n === a) {
+              sums.push(n * 2)
+              a = 0
+            }else {
+              sums.push(a)
+              a = n
+            }
+          }
+          sums.push(a)
+          for (let c = 0; c < 4; c++) {
+            this.data[r][c] = sums[3 - c] || 0
+          }
+        }
+      },
+      move (dir) {
+        if (dir === 1) {
+          if(!this.canUp()) return
+            this.up()
+        } else if (dir === 2) {
+          if(!this.canRight()) return
+            this.right()
+        } else if (dir === 3) {
+          if(!this.canDown()) return
+            this.down()
+        } else if (dir === 4) {
+          if(!this.canLeft()) return
+            this.left()
         }
         
         this.random()
         this.render()
+        
+        if (this.die()) {
+          this.gameover()
+        }
       },
 
       die () {
-        for (let i = 0; i < 4; i++) {
-          for (let j = 0; j < 4; j++) {
-            if (!this.data[i][j]) return false
+        return !(this.canLeft() || this.canRight() || this.canUp() || this.canDown())
+      },
+
+      canLeft () {
+        for (let r = 0; r < 4; r++) {
+          let a = 0
+          for (let c = 3; c >= 0; c--) {
+            let n = this.data[r][c]
+            if (a === 0) a = n
+            else if (n === 0 || a === n) return true
           }
         }
-        return true
+      },
+
+      canRight () {
+        for (let r = 0; r < 4; r++) {
+          let a = 0
+          for (let c = 0; c < 4; c++) {
+            let n = this.data[r][c]
+            if (a === 0) a = n
+            else if (n === 0 || a === n) return true
+          }
+        }
+      },
+
+      canUp () {
+        for (let c = 0; c < 4; c++) {
+          let a = 0
+          for (let r = 3; r >= 0; r--) {
+            let n = this.data[r][c]
+            if (a === 0) a = n
+            else if (n === 0 || a === n) return true
+          }
+        }
+      },
+      
+      canDown () {
+        for (let c = 0; c < 4; c++) {
+          let a = 0
+          for (let r = 0; r < 4; r++) {
+            let n = this.data[r][c]
+            if (a === 0) a = n
+            else if (n === 0 || a === n) return true
+          }
+        }
       },
 
       gameover () {
-        this.render()
         alert('Game over')
       }
     }
@@ -227,20 +341,19 @@
     G2048.init(document.querySelector('.wrap'))
     G2048.start()
 
-    function calc (code) {
-      console.log(code)
+    function move (code) {
       switch(code) {
         case 37:
-          G2048.calc(4)
+          G2048.move(4)
           break
         case 38:
-          G2048.calc(1)
+          G2048.move(1)
           break
         case 39:
-          G2048.calc(2)
+          G2048.move(2)
           break
         case 40:
-          G2048.calc(3)
+          G2048.move(3)
           break
         case 32:
           G2048.start()
@@ -248,7 +361,7 @@
       }
     }
 
-    window.onkeydown = e => calc(e.keyCode)
+    window.onkeydown = e => move(e.keyCode)
   </script>
 </body>
 </html>
