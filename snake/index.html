@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Snakes Subsonic</title>
+  <style>
+    .wrap {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 120px;
+    }
+    canvas {
+      vertical-align: middle;
+    }
+    .controls {
+      position: fixed;
+      bottom: 10px;
+      right: 14px;
+      text-align: center;
+    }
+    .row { margin-bottom: 4px;}
+    .btn {
+      display: inline-block;
+      width: 60px;
+      height: 32px;
+      line-height: 32px;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+      background-color: #f0f0f0;
+      color: #333;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap"></div>
+  <div class="controls">
+    <div class="row">
+      <div class="btn" onclick="setDir(38)">UP</div>
+    </div>
+    <div class="row">
+      <div class="btn" onclick="setDir(37)">LEFT</div>
+      <div id="btn-pause" class="btn" onclick="pause()">PAUSE</div>
+      <div class="btn" onclick="setDir(39)">RIGHT</div>
+    </div>
+    <div class="row">
+      <div class="btn" onclick="setDir(40)">DOWN</div>
+    </div>
+  </div>
+  <script>
+    const Snake = {
+      width: 0,
+      height: 0,
+      rows: 30,
+      cols: 50,
+      snake: [],
+      dir: [-1, 0],
+      lastDir: [-1, 0],
+      speed: 200,
+      scores: 0,
+      timer: null,
+      status: 0,
+      bean: [],
+
+      init (dom) {
+        const cvs = document.createElement('canvas')
+        const w = dom.offsetWidth
+        const h = dom.offsetHeight
+        cvs.width = w
+        cvs.height = h
+        cvs.style.width = w + 'px'
+        cvs.style.height = h + 'px'
+        dom.innerHTML = ''
+        dom.appendChild(cvs)
+        this.ctx = cvs.getContext('2d')
+        this.width = w
+        this.height = h
+      },
+
+      start () {
+        const autoMove = () => {
+          if (this.status !== 1) return
+          this.render()
+          this.move()
+          this.timer = setTimeout(autoMove, this.speed)
+        }
+
+        if (this.status === 0 || this.status === 3) {
+          this.geneBean()
+          this.initSnake()
+        }
+
+        this.status = 1
+        autoMove()
+      },
+
+      initSnake () {
+        const x = Math.floor(this.cols / 2)
+        const y = Math.floor(this.rows / 2)
+        this.snake = [x - 1, y, x, y, x + 1, y]
+      },
+
+      render () {
+        const ctx = this.ctx
+        const w = this.cols + 2
+        const h = this.rows + 2
+        const scale = Math.min(this.width / w, this.height / h)
+        const dx = (this.width - w * scale) / 2;
+        const dy = (this.height - h * scale) / 2;
+        ctx.clearRect(0, 0, this.width, this.height)
+        ctx.save()
+        ctx.translate(dx, dy)
+        ctx.scale(scale, scale)
+        ctx.strokeRect(0.5, 0.5, w - 1, h - 1)
+        for (let i = 0; i < this.snake.length; i += 2) {
+          const x = this.snake[i]
+          const y = this.snake[i + 1]
+          ctx.fillRect(x, y, 1, 1)
+        }
+        ctx.fillRect(this.bean[0], this.bean[1], 1, 1)
+        ctx.restore()
+      },
+
+      geneBean () {
+        let flag = true
+        let x, y
+        while (flag) {
+          x = Math.floor(Math.random() * this.cols)
+          y = Math.floor(Math.random() * this.rows)
+          flag = this.isInSnake(x, y)
+        }
+        this.bean = [x, y]
+      },
+
+      isInSnake (x, y) {
+        for (let i = 0; i < this.snake.length; i += 2) {
+          if (this.snake[i] === x && this.snake[i + 1] === y) {
+            return true;
+          } 
+        }
+        return false
+      },
+
+      move () {
+        this.snake.splice(this.snake.length - 2, 2)
+        this.snake.unshift(this.snake[0] + this.dir[0], this.snake[1] + this.dir[1])
+        if (this.die()) {
+          this.gameOver()
+        }
+        if (this.isInSnake(this.bean[0], this.bean[1])) {
+          this.eat()
+        }
+        this.lastDir = this.dir
+      },
+
+      eat () {
+        this.snake.push(...this.bean)
+        this.geneBean()
+      },
+
+      die () {
+        const x = this.snake[0]
+        const y = this.snake[1]
+        
+        if (x < 0 || x >= this.cols || y < 0 || y >= this.rows) return true
+
+        for (let i = 2; i < this.snake.length; i += 2) {
+          if (this.snake[i] === x && this.snake[i + 1] === y) {
+            return true;
+          } 
+        }
+        return false
+      },
+
+      gameOver () {
+        if (this.animationId) {
+          window.cancelAnimationFrame(this.animationId)
+          this.animationId = null
+        }
+
+        if (this.timer) {
+          clearTimeout(this.timer)
+          this.timer = null
+        }
+
+        this.status = 3
+
+        alert('Game over! Score ' + this.scores)
+      }
+    }
+  </script>
+  
+  <script>
+    Snake.init(document.querySelector('.wrap'))
+    Snake.start()
+
+    function setDir (code) {
+      switch(code) {
+        case 37:
+          if (Snake.lastDir[0] === 0) Snake.dir = [-1, 0]
+          break
+        case 38:
+          if (Snake.lastDir[1] === 0)  Snake.dir = [0, -1]
+          break
+        case 39:
+          if (Snake.lastDir[0] === 0) Snake.dir = [1, 0]
+          break
+        case 40:
+          if (Snake.lastDir[1] === 0) Snake.dir = [0, 1]
+          break
+      }
+    }
+
+    function pause () {
+      const pauseBtn = document.getElementById('btn-pause')
+      Snake.status === 1 ? Snake.status = 2 : Snake.start()
+      pauseBtn.innerHTML = Snake.status === 1 ? "PAUSE" : "START"
+    }
+
+    window.onkeydown = function (e) {
+      setDir(e.keyCode)
+    }
+  </script>
+</body>
+</html>
