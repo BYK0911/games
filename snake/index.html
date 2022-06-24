@@ -92,6 +92,8 @@
         if (this.status === 0 || this.status === 3) {
           this.geneBean()
           this.initSnake()
+          this.dir = [-1, 0]
+          this.lastDir = [-1, 0]
         }
 
         this.status = 1
@@ -106,8 +108,8 @@
 
       render () {
         const ctx = this.ctx
-        const w = this.cols + 2
-        const h = this.rows + 2
+        const w = this.cols
+        const h = this.rows
         const scale = Math.min(this.width / w, this.height / h)
         const dx = (this.width - w * scale) / 2;
         const dy = (this.height - h * scale) / 2;
@@ -115,7 +117,19 @@
         ctx.save()
         ctx.translate(dx, dy)
         ctx.scale(scale, scale)
-        ctx.strokeRect(0.5, 0.5, w - 1, h - 1)
+        ctx.lineWidth = 1 / scale
+        ctx.strokeStyle = '#f0f0f0'
+        ctx.beginPath()
+        for (let i = 0; i <= this.rows; i++) {
+          ctx.moveTo(0, i)
+          ctx.lineTo(this.cols, i)
+        }
+        for (let i = 0; i <= this.cols; i++) {
+          ctx.moveTo(i, 0)
+          ctx.lineTo(i, this.rows)
+        }
+        ctx.stroke()
+        ctx.closePath()
         for (let i = 0; i < this.snake.length; i += 2) {
           const x = this.snake[i]
           const y = this.snake[i + 1]
@@ -160,6 +174,8 @@
       eat () {
         this.snake.push(...this.bean)
         this.geneBean()
+        this.scores++
+        this.speed--
       },
 
       die () {
@@ -177,11 +193,6 @@
       },
 
       gameOver () {
-        if (this.animationId) {
-          window.cancelAnimationFrame(this.animationId)
-          this.animationId = null
-        }
-
         if (this.timer) {
           clearTimeout(this.timer)
           this.timer = null
@@ -189,7 +200,7 @@
 
         this.status = 3
 
-        alert('Game over! Score ' + this.scores)
+        setTimeout(() => alert('Game over! Score ' + this.scores))
       }
     }
   </script>
@@ -211,6 +222,9 @@
           break
         case 40:
           if (Snake.lastDir[1] === 0) Snake.dir = [0, 1]
+          break
+        case 32:
+          pause()
           break
       }
     }
