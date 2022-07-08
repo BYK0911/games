@@ -26,11 +26,16 @@ const Slip = (() => {
           emit(dy > 0 ? 'down' : 'up')
         }
       })
+      document.body.addEventListener('touchmove', e => {
+        e.preventDefault()
+      })
       document.body.addEventListener('touchstart', e => {
+        e.preventDefault()
         dragPrevX = e.changedTouches[0].pageX
         dragPrevY = e.changedTouches[0].pageY
       })
       document.body.addEventListener('touchend', e => {
+        e.preventDefault()
         const dx = e.changedTouches[0].pageX - dragPrevX
         const dy = e.changedTouches[0].pageY - dragPrevY
         if (!dx && !dy) return

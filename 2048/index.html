@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>2048</title>
   <style>
     html, body {
@@ -13,31 +13,36 @@
       padding: 0;
     }
     .wrap {
-      padding: 20px;
+      padding: .2rem;
       pointer-events: none;
     }
     .panel {
+      box-sizing: border-box;
       display: flex;
+      width: 4rem;
+      height: 4rem;
       justify-content: space-around;
       align-content: space-around;
       flex-wrap: wrap;
-      border-radius: 10px;
+      border-radius: .1rem;
       border: 2px solid #ddd;
+      padding: .1rem;
     }
     .grid {
+      position: relative;
       flex: none;
-      width: 22%;
-      height: 22%;
-      border-radius: 6px;
+      width: .85rem;
+      height: .85rem;
+      border-radius: .06rem;
       overflow: hidden;
     }
     .grid::after {
       display: block;
       width: 100%;
       height: 100%;
-      line-height: 50px;
+      line-height: .85rem;
       text-align: center;
-      font-size: 20px;
+      font-size: .24rem;
       color: #fff;
     }
     .grid-0::after {
@@ -98,6 +103,9 @@
   <div class="wrap"></div>
   <script src="../utils/slip.js"></script>
   <script>
+    document.documentElement.style.fontSize = window.innerWidth / 440 * 100 + 'px'
+  </script>
+  <script>
     G2048 = {
       data: [],
       grids: {},
@@ -105,9 +113,6 @@
 
       init (dom) {
         const panel = document.createElement('div')
-        const w = Math.min(window.innerWidth, window.innerHeight) - 40
-        panel.style.width = w + 'px'
-        panel.style.height = w + 'px'
         panel.className = 'panel'
         for (let i = 0; i < 4; i++) {
           for (let j = 0; j < 4; j++) {
@@ -345,7 +350,7 @@
     Slip.listen()
 
     window.onkeydown = e => {
-      switch(e.keycode) {
+      switch(e.keyCode) {
         case 37:
           G2048.move(4)
           break
