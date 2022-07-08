@@ -6,26 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>2048</title>
   <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
     .wrap {
-      position: absolute;
-      left: 50%;
-      transform: translate(-50%, 0)
+      padding: 20px;
+      pointer-events: none;
     }
     .panel {
       display: flex;
-      justify-content: space-between;
-      align-content: space-between;
+      justify-content: space-around;
+      align-content: space-around;
       flex-wrap: wrap;
-      width: 210px;
-      height: 210px;
       border-radius: 10px;
       border: 2px solid #ddd;
-      padding: 5px;
     }
     .grid {
       flex: none;
-      width: 50px;
-      height: 50px;
+      width: 22%;
+      height: 22%;
       border-radius: 6px;
       overflow: hidden;
     }
@@ -90,50 +92,22 @@
       content: '4096';
       background-color: #65f;
     }
-    .controls {
-      position: fixed;
-      bottom: 10px;
-      right: 14px;
-      text-align: center;
-    }
-    .row { margin-bottom: 4px;}
-    .btn {
-      display: inline-block;
-      vertical-align: middle;
-      width: 60px;
-      height: 32px;
-      line-height: 32px;
-      border-radius: 3px;
-      border: 1px solid #ddd;
-      background-color: #f0f0f0;
-      color: #333;
-      font-size: 14px;
-      cursor: pointer;
-    }
   </style>
 </head>
-<body>
+<body draggable="false">
   <div class="wrap"></div>
-  <div class="controls">
-    <div class="row">
-      <div class="btn" onclick="move(38)">UP</div>
-    </div>
-    <div class="row">
-      <div class="btn" onclick="move(37)">LEFT</div>
-      <div class="btn"></div>
-      <div class="btn" onclick="move(39)">RIGHT</div>
-    </div>
-    <div class="row">
-      <div class="btn" onclick="move(40)">DOWN</div>
-    </div>
-  </div>
+  <script src="../utils/slip.js"></script>
   <script>
     G2048 = {
       data: [],
       grids: {},
+      scores: 0,
 
       init (dom) {
         const panel = document.createElement('div')
+        const w = Math.min(window.innerWidth, window.innerHeight) - 40
+        panel.style.width = w + 'px'
+        panel.style.height = w + 'px'
         panel.className = 'panel'
         for (let i = 0; i < 4; i++) {
           for (let j = 0; j < 4; j++) {
@@ -169,6 +143,7 @@
           const [r, c] = list[i]
           const n = Math.random() > .5 ? 4 : 2
           this.data[r][c] = n
+          this.scores += n
         }
       },
       render () {
@@ -355,7 +330,7 @@
       },
 
       gameover () {
-        setTimeout(() => alert('Game over'))
+        setTimeout(() => alert('Game over, Scores ' + this.scores))
       }
     }
   </script>
@@ -363,8 +338,14 @@
     G2048.init(document.querySelector('.wrap'))
     G2048.start()
 
-    function move (code) {
-      switch(code) {
+    Slip.on('up', () => G2048.move(1))
+    Slip.on('right', () => G2048.move(2))
+    Slip.on('down', () => G2048.move(3))
+    Slip.on('left', () => G2048.move(4))
+    Slip.listen()
+
+    window.onkeydown = e => {
+      switch(e.keycode) {
         case 37:
           G2048.move(4)
           break
@@ -382,8 +363,6 @@
           break
       }
     }
-
-    window.onkeydown = e => move(e.keyCode)
   </script>
 </body>
 </html>
